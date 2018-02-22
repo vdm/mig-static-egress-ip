@@ -1,0 +1,18 @@
+---
+kind: Job
+apiVersion: batch/v1
+metadata:
+  name: mig-static-egress-ip
+spec:
+  backoffLimit: 1
+  activeDeadlineSeconds: 100
+  template:
+    spec:
+      containers:
+        - name: curl
+          image: google/cloud-sdk
+          command: ["curl", "-s", "ifconfig.co"]
+      initContainers:
+        - name: egress-ip
+          image: vdm1/mig-static-egress-ip
+      restartPolicy: Never

@@ -2,7 +2,7 @@
 
 Google Compute Engine (GCE) Managed Instance Group (MIG) instances are assigned ephemeral public IP addresses and this [can](https://groups.google.com/forum/#!topic/kubernetes-users/C34yKt0qKtY) [not](https://groups.google.com/forum/#!topic/kubernetes-users/zNytc8GVB5s) be configured. This is a problem for any processes on those instances which need to communicate with old-fashioned third-party servers which insist on whitelisting client IPs.
 
-A static IP can be assigned to an existing VM with the GCE 'access-config' API. `mig-static-egress-ip.bash` runs on the VM, identifying the VM from the GCE metadata server, and then using gcloud to both check whether any current external IP is static, and if not replace it. It will also work where there is no assigned public IP, allowing this option to be selected in the MIG instance template, and saving assigning an ephemeral IP only to immediate delete it.
+A static IP can be assigned to an existing VM with the GCE [_access-config_](https://cloud.google.com/sdk/gcloud/reference/compute/instances/add-access-config) API. `mig-static-egress-ip.bash` runs on the VM to identify the VM from the GCE metadata server, and then uses `gcloud` to check whether any currently assigned external IP is static, and if not replace it. It will also work where there is no assigned public IP, allowing the 'None' public IP option to be selected in the MIG instance template, and saving assigning an ephemeral IP only to immediate delete it.
 
 If there is no allocated and unassigned static IP available, the script will exit with a non-zero code. It does not attempt to allocate such IPs itself, because whitelisting them normally requires humans.
 
@@ -26,7 +26,7 @@ $ gcloud config set compute/zone europe-west1-d
 $ gcloud config list
 ```
 
-Without "Private Google Access" enabled, `delete-access-config` will work with an ephemeral IP but then the following call to `add-access-config` will fail because the GCE VM can not access the Compute Engine API. This also prevents logs from being shipped to Stackdriver Logging.
+Without [_Private Google Access_](https://cloud.google.com/vpc/docs/private-google-access) enabled, the initial `delete-access-config` call will work from an ephemeral IP, but the following call to `add-access-config` will fail because the GCE VM can no longer access the GCE API. This also prevents logs from being shipped to Stackdriver Logging.
 ```
 $ gcloud compute networks subnets update default --enable-private-ip-google-access
 ```

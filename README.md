@@ -64,7 +64,7 @@ $ kubectl logs job/curl-egress-ip
 ```
 
 ## Docker container (without K8S)
-Does not use Kubernetes. Works for GKE GCE VMs. Docker Hub image: [vdm1/mig-egress-static-ip](https://hub.docker.com/u/vdm1/mig-egress-static-ip)
+Does not use Kubernetes. Works for GKE GCE VMs. Docker Hub image: [vdm1/mig-egress-static-ip](https://hub.docker.com/r/vdm1/mig-egress-static-ip/)
 
 ```
 local$ gcloud compute ssh INSTANCE

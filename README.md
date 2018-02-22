@@ -6,7 +6,7 @@ A static IP can be assigned to an existing VM with the GCE 'access-config' API. 
 
 If there is no allocated and unassigned static IP available, the script will exit with a non-zero code. It does not attempt to allocate such IPs itself, because whitelisting them normally requires humans.
 
-# Diagnostics
+## Diagnostics
 ```
 $ gcloud compute addresses list
 NAME  REGION        ADDRESS      STATUS
@@ -19,16 +19,13 @@ $ gcloud compute instances describe INSTANCE --format='value(networkInterfaces[0
 kind=compute#accessConfig;name=External NAT;natIP=35.x.x.12;type=ONE_TO_ONE_NAT
 ```
 
-# Usage
 ## Configuration
-### gcloud
 ```
 $ gcloud config set project PROJECT
 $ gcloud config set compute/zone europe-west1-d
 $ gcloud config list
 ```
 
-# GCE
 Without "Private Google Access" enabled, `delete-access-config` will work with an ephemeral IP but then the following call to `add-access-config` will fail because the GCE VM can not access the Compute Engine API. This also prevents logs from being shipped to Stackdriver Logging.
 ```
 $ gcloud compute networks subnets update default --enable-private-ip-google-access
@@ -40,7 +37,8 @@ $ gcloud compute addresses create a1 --region europe-west1
 $ gcloud compute addresses create a2 --region europe-west1
 ```
 
-## Kubernetes [init container](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/)
+## Usage
+### Kubernetes [init container](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/)
 This can be used by any Pod that requires an egress static IP. Here we use a Job to demonstrate, but it should also work with a Deployment or other Pod.
 
 The https://www.googleapis.com/auth/compute (compute-rw) OAuth scope is not assigned by default in GKE and is required for address enumeration and assignment.
@@ -49,31 +47,28 @@ $ gcloud container clusters create test --preemptible --num-nodes=1 --scopes=gke
 $ gcloud container clusters get-credentials test
 ```
 
-### Before
+#### Before
 ```
 $ kubectl run test -it --quiet --rm --restart=Never --image=google/cloud-sdk -- curl -s https://ifconfig.co/
 35.x.x.198
 ```
 
-### Execute
 ```
 $ kubectl apply k8s.yaml
 ```
 
-### After
+#### After
 ```
 $ kubectl logs job/curl-egress-ip
 104.x.x.127
 ```
 
 ## Docker container (without K8S)
-Does not use Kubernetes. Works for GKE GCE VMs.
-
-@@ test with Docker Hub image
+Does not use Kubernetes. Works for GKE GCE VMs. Docker Hub image: [vdm1/mig-egress-static-ip](https://hub.docker.com/u/vdm1/mig-egress-static-ip)
 
 ```
 local$ gcloud compute ssh INSTANCE
-ssh$ docker run -it [vdm1/mig-static-egress-ip](@@ hub.docker.com/u/vdm1/mig-egress-static-ip)
+ssh$ docker run vdm1/mig-static-egress-ip
 + gcloud compute instances delete-access-config INSTANCE '--access-config-name=External NAT'
 Updated [https://www.googleapis.com/compute/v1/projects/p/zones/europe-west1-d/instances/INSTANCE].
 + gcloud compute instances add-access-config INSTANCE --address 35.x.x.12

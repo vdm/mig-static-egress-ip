@@ -10,7 +10,7 @@ spec:
     spec:
       containers:
         - name: curl
-          image: google/cloud-sdk
+          image: google/cloud-sdk:slim
           command: ["curl", "-s", "ifconfig.co"]
       initContainers:
         - name: egress-ip
